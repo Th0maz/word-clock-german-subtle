@@ -2,14 +2,15 @@
 #include "SerialHelper.h"
 
 const uint32_t COLORS[] = {
-    0xFF0000,
-    0x00FF00,
-    0x0000FF,
-    0xFFFF00,
-    0xFF00FF,
-    0x00FFFF,
-    0xFFFFFF,
-    0xA52A2A};
+    //0xFF0000,
+    //0x00FF00,
+    //0x0000FF,
+    //0xFFFF00,
+    //0xFF00FF,
+    //0x00FFFF,
+    //0xFFFFFF,
+    //0xA52A2A
+    0x7F7F7F};
 
 WordClock::WordClock(ClockDisplayHAL *clockDisplayHAL, NetworkManager *networkManager, GifPlayer *gifPlayer)
     : clockDisplayHAL(clockDisplayHAL), networkManager(networkManager), gifPlayer(gifPlayer), lastHour(-1), allLastHighlightedWords(""), gifDownloaded(false) {}
@@ -98,7 +99,7 @@ void WordClock::displayTime()
         lastHour = hour;
         if (gifDownloaded)
         {
-            gifPlayer->playGIF(4000);
+            //gifPlayer->playGIF(4000);
         }
         clockDisplayHAL->clearPixels(false);
     }
