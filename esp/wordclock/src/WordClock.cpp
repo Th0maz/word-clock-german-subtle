@@ -137,7 +137,7 @@ void WordClock::displayTime()
 
     if (allLastHighlightedWords != allHighlightedWords)
     {
-        clockDisplayHAL->show();
+        clockDisplayHAL->showFaded();
         allLastHighlightedWords = allHighlightedWords;
     }
 }
