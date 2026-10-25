@@ -36,6 +36,7 @@ void ClockDisplayHAL::setup()
     pixels.setBrightness(255);
     pixels.begin();
     pixels.show();
+    memset(shownColors, 0, sizeof(shownColors));
 }
 
 void ClockDisplayHAL::displayWord(const String &word, uint32_t color)
@@ -88,11 +89,82 @@ void ClockDisplayHAL::clearPixels(bool show)
     pixels.clear();
     if (show)
     {
-        pixels.show();
+        this->show();
     }
 }
 
 void ClockDisplayHAL::show()
 {
+    pixels.show();
+
+    // Merken, was gerade tatsächlich leuchtet - Startpunkt für das nächste Überblenden
+    for (uint16_t i = 0; i < NUM_LEDS; ++i)
+    {
+        shownColors[i] = pixels.getPixelColor(i);
+    }
+}
+
+// Linear zwischen zwei Farbkanälen mischen, t = 0..256
+static inline uint8_t lerp8(uint8_t a, uint8_t b, uint16_t t)
+{
+    return (uint8_t)(((uint16_t)a * (256 - t) + (uint16_t)b * t) >> 8);
+}
+
+static uint32_t blendColor(uint32_t from, uint32_t to, uint16_t t)
+{
+    uint8_t r = lerp8((from >> 16) & 0xFF, (to >> 16) & 0xFF, t);
+    uint8_t g = lerp8((from >> 8) & 0xFF, (to >> 8) & 0xFF, t);
+    uint8_t b = lerp8(from & 0xFF, to & 0xFF, t);
+    return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
+}
+
+// Zeigt den aktuell im Puffer aufgebauten Zustand, indem vom zuletzt
+// angezeigten Zustand weich übergeblendet wird. Pixel, die neu leuchten,
+// werden eingeblendet, Pixel, die ausgehen, ausgeblendet, unveränderte
+// Pixel bleiben konstant.
+void ClockDisplayHAL::showFaded(uint16_t durationMs)
+{
+    uint32_t target[NUM_LEDS];
+    bool changed = false;
+
+    for (uint16_t i = 0; i < NUM_LEDS; ++i)
+    {
+        target[i] = pixels.getPixelColor(i);
+        if (target[i] != shownColors[i])
+        {
+            changed = true;
+        }
+    }
+
+    if (!changed)
+    {
+        // Nichts zu überblenden - Anzeige nur wiederherstellen
+        for (uint16_t i = 0; i < NUM_LEDS; ++i)
+        {
+            pixels.setPixelColor(i, target[i]);
+        }
+        pixels.show();
+        return;
+    }
+
+    uint32_t startMs = millis();
+    uint32_t elapsed;
+    while ((elapsed = millis() - startMs) < durationMs)
+    {
+        uint16_t t = (uint16_t)((elapsed * 256UL) / durationMs);
+        for (uint16_t i = 0; i < NUM_LEDS; ++i)
+        {
+            pixels.setPixelColor(i, blendColor(shownColors[i], target[i], t));
+        }
+        pixels.show();
+        yield(); // WLAN-Stack / Watchdog bedienen
+    }
+
+    // Endzustand exakt setzen
+    for (uint16_t i = 0; i < NUM_LEDS; ++i)
+    {
+        pixels.setPixelColor(i, target[i]);
+        shownColors[i] = target[i];
+    }
     pixels.show();
 }
