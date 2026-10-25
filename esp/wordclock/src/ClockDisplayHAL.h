@@ -17,9 +17,12 @@ public:
     void setPixel(uint8_t x, uint8_t y, uint32_t color);
     void clearPixels(bool show = true);
     void show();
+    // Blendet vom zuletzt angezeigten Zustand weich zum aufgebauten Zustand über
+    void showFaded(uint16_t durationMs = 5000);
 
 private:
     uint8_t brightness;
+    uint32_t shownColors[NUM_LEDS] = {0};
 
     static const struct WordMapping
     {
