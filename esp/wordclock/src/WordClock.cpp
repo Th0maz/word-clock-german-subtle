@@ -17,7 +17,7 @@ WordClock::WordClock(ClockDisplayHAL *clockDisplayHAL, NetworkManager *networkMa
 
 void WordClock::setup()
 {
-    downloadGIF();
+    //downloadGIF();
 }
 
 void WordClock::downloadGIF()
