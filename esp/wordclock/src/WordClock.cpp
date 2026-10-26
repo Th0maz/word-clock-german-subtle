@@ -17,7 +17,7 @@ WordClock::WordClock(ClockDisplayHAL *clockDisplayHAL, NetworkManager *networkMa
 
 void WordClock::setup()
 {
-    //downloadGIF();
+    downloadGIF();
 }
 
 void WordClock::downloadGIF()
@@ -99,7 +99,7 @@ void WordClock::displayTime()
         lastHour = hour;
         if (gifDownloaded)
         {
-            //gifPlayer->playGIF(4000);
+            gifPlayer->playGIF(4000);
         }
         clockDisplayHAL->clearPixels(false);
     }
@@ -113,23 +113,73 @@ void WordClock::displayTime()
         highlightWord("OCLOCK", getRandomColor());
         allHighlightedWords += "OCLOCK";
     }
-    else if (minute < 35)
+    else if (minute < 15)
     {
         highlightWord("PAST", getRandomColor());
         highlightWord("MINUTES", getRandomColor());
         allHighlightedWords += "PASTMINUTES";
+    }
+    else if (minute < 20)
+    {
+        highlightWord("PAST", getRandomColor());
+        allHighlightedWords += "PAST";
+    }
+    else if (minute < 25)
+    {
+        highlightWord("PAST", getRandomColor());
+        highlightWord("MINUTES", getRandomColor());
+        allHighlightedWords += "PASTMINUTES";
+    }
+    else if (minute < 30)
+    {
+        highlightWord("FIVE", getRandomColor());
+        highlightWord("TO", getRandomColor());
+        allHighlightedWords += "FIVETO";
+    }
+    else if (minute < 35)
+    {
+        allHighlightedWords += "HALF";
+    }
+    else if (minute < 40)
+    {
+        highlightWord("FIVE", getRandomColor());
+        highlightWord("PAST", getRandomColor());
+        allHighlightedWords += "FIVEPAST";
+    }
+    else if (minute < 45)
+    {
+        highlightWord("TO", getRandomColor());
+        highlightWord("MINUTES", getRandomColor());
+        allHighlightedWords += "TOMINUTES";
+    }
+    else if (minute < 50)
+    {
+        highlightWord("TO", getRandomColor());
+        allHighlightedWords += "TO";
     }
     else
     {
         highlightWord("TO", getRandomColor());
         highlightWord("MINUTES", getRandomColor());
         allHighlightedWords += "TOMINUTES";
+
+    }
+
+    if (minute >= 25)
+    {
         hour = (hour + 1) % 12;
         if (hour == 0)
+        {
             hour = 12;
+        }
     }
 
     String hourWord = "HOUR_" + String(hour);
+
+    if (hour == 1 && minute < 5) {
+        hourWord = "HOUR_0";
+    }
+
     highlightWord(getMinutesWord(minute), getRandomColor());
     allHighlightedWords += getMinutesWord(minute);
     highlightWord(hourWord, getRandomColor());
